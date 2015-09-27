@@ -10,7 +10,7 @@
 
       var map;
       function initialize() {
-	var pos;
+	    var pos;
         if(navigator.geolocation) {
           pos = navigator.geolocation.getCurrentPosition(function(position) {
 	    initialLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
@@ -100,7 +100,10 @@
     </script>
 
     <style>
-      #output       { opacity: 0.9; border-radius: 8px; }
+      #output       
+      { opacity: 0.9; 
+        border-radius: 8px;
+      }
       #output:hover { opacity: 0.5; }
     </style>
 
@@ -113,18 +116,18 @@
       <form action="#" method="GET" onsubmit="javascript:go()" accept-charset=utf-8>
         <img id="loading" src="ajax-loader.gif" style="position: absolute; top: -54px; left: 0; right: 0; bottom: 0; margin: auto; width: 53px; height: 54px" />
 
-        <div id="output" style="visibility: hidden; position: absolute; background-color: white; padding: 1%; left: 4.5%; bottom: 9%">
+        <div id="output" style="visibility: hidden; position: absolute; background-color: #DBDADC; box-shadow: 5px 5px 20px #888888; padding: 1%; left: 4.5%; bottom: 9%">
           <label style="font-size: 3vmin">Statistics for <label id="state"></label>:</label><br>
           ----<br>
           <label style="font-size: 2vmin">Median Income: $<label id="income">0</label></label><br>
-          <label style="font-size: 2vmin">Median Income: $<label id="rent">0</label></label><br>
+          <label style="font-size: 2vmin">Median Gross Rent: $<label id="rent">0</label></label><br>
           <label style="font-size: 2vmin">Unemployed in Labor Force: <label id="job">0</label></label><br />
           <label style="font-size: 2vmin">Population: <label id="pop">0</label></label><br /><br />
 
           <label style="font-size: 3vmin">Statistics for <label id="zip"></label>:</label><br />
           ----<br>
           <label style="font-size: 2vmin">Median Income: $<label id="income1">0</label></label><br>
-          <label style="font-size: 2vmin">Median Income: $<label id="rent1">0</label></label><br>
+          <label style="font-size: 2vmin">Median Gross Rent: $<label id="rent1">0</label></label><br>
           <label style="font-size: 2vmin">Unemployed in Labor Force: <label id="job1">0</label></label><br />
           <label style="font-size: 2vmin">Population: <label id="pop1">0</label></label><br /><br />
 
