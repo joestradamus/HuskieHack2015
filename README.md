@@ -1,2 +1,2 @@
 # HuskieHack2015
-TBD
+Download the zip, and open up the html file. Begin entering zip codes for funsies. 
