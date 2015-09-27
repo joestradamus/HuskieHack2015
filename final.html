@@ -1,0 +1,138 @@
+<!doctype HTML>
+<html>
+  <head>
+    <script src="https://maps.googleapis.com/maps/api/js"></script>
+    <script src="http://code.jquery.com/jquery-2.1.4.min.js" type="text/javascript"></script>
+    <script src="https://cdn.rawgit.com/uscensusbureau/citysdk/Release1.1/js/citysdk.js"></script>
+    <script src="https://cdn.rawgit.com/uscensusbureau/citysdk/Release1.1/js/citysdk.census.js"></script>
+    <script>
+      function go() { submit(); }
+
+      var map;
+      function initialize() {
+	var pos;
+        if(navigator.geolocation) {
+          pos = navigator.geolocation.getCurrentPosition(function(position) {
+	    initialLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+            map.setCenter(initialLocation);} );
+	}
+        var mapCanvas = document.getElementById('map');
+        var mapOptions = {
+	  center: pos,
+          zoom: 11,
+	  streetViewControl: false,
+	  mapTypeControl: false,
+          draggable: false,
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+        }
+        map = new google.maps.Map(mapCanvas, mapOptions);
+        document.getElementById("loading").style.visibility = "hidden";
+      }
+      google.maps.event.addDomListener(window, 'load', initialize);
+    </script>
+
+    <script>
+        var sdk, census;
+        $(document).ready(function() {
+            sdk = new CitySDK();
+            census = sdk.modules.census;
+            var apiKey = "d4950eab815cf385f4dc9b31e72c05c5dcc126dc";
+            census.enable(apiKey);
+        });
+        function submit() {
+            document.getElementById("output").style.visibility = "hidden";
+            document.getElementById("loading").style.visibility = "visible";
+            var geocoder = new google.maps.Geocoder();
+            var zip = $('#address');
+            var request = {
+                zip: zip.val(),
+                variables: ["income", "median_gross_rent", "employment_unemployed", "population"],
+                level: "state"
+            }
+            census.APIRequest(request, function(response) {
+                geocoder.geocode({'address': $('#address').val()}, function(result, status) {
+                  var state = "";
+                  for(var component in result[0]['address_components']) {
+                    for(var i in result[0]['address_components'][component]['types']) {
+                      if(result[0]['address_components'][component]['types'][i] == "administrative_area_level_1") {
+                        var state = result[0]['address_components'][component]['long_name'];
+                      }
+                    }
+                  }
+                  $('#state').html(state);
+                });
+                $('#income').html(response.data[0].income);
+                $('#rent').html(response.data[0].median_gross_rent);
+                $('#job').html(response.data[0].employment_unemployed);
+                $('#pop').html(response.data[0].population);
+            });
+            var request = {
+                zip: zip.val(),
+                variables: ["income", "median_gross_rent", "employment_unemployed", "population"],
+                level: "county"
+            }
+            census.APIRequest(request, function(response) {
+              geocoder.geocode({'address': $('#address').val()}, function(result, status) {
+                var county = "";
+                for(var component in result[0]['address_components']) {
+                  for(var i in result[0]['address_components'][component]['types']) {
+                    if(result[0]['address_components'][component]['types'][i] == "administrative_area_level_2") {
+                      county = result[0]['address_components'][component]['long_name'];
+                     }
+                  }
+                }
+                if(county == "") { county = result[0].address_components[1].long_name; }
+                $('#zip').html(county);
+              });
+                $('#income1').html(response.data[0].income);
+                $('#rent1').html(response.data[0].median_gross_rent);
+                $('#job1').html(response.data[0].employment_unemployed);
+                $('#pop1').html(response.data[0].population);
+
+          geocoder.geocode({'address': $('#address').val()}, function(result, status) {
+            map.panTo(result[0].geometry.location);
+          });
+
+                document.getElementById("loading").style.visibility = "hidden";
+                document.getElementById("output").style.visibility = "visible";
+            });
+        }
+    </script>
+
+    <style>
+      #output       { opacity: 0.9; border-radius: 8px; }
+      #output:hover { opacity: 0.5; }
+    </style>
+
+  </head>
+  <body onload="javascript:onload()" style="font-size: 105%; margin: 0; padding: 0; font-family: arial">
+
+    <div style="position: relative; height: 100vh">
+      <div id="map" style="width: 100%; height: 100%"></div>
+
+      <form action="#" method="GET" onsubmit="javascript:go()" accept-charset=utf-8>
+        <img id="loading" src="ajax-loader.gif" style="position: absolute; top: -54px; left: 0; right: 0; bottom: 0; margin: auto; width: 53px; height: 54px" />
+
+        <div id="output" style="visibility: hidden; position: absolute; background-color: white; padding: 1%; left: 4.5%; bottom: 9%">
+          <label style="font-size: 3vmin">Statistics for <label id="state"></label>:</label><br>
+          ----<br>
+          <label style="font-size: 2vmin">Median Income: $<label id="income">0</label></label><br>
+          <label style="font-size: 2vmin">Median Income: $<label id="rent">0</label></label><br>
+          <label style="font-size: 2vmin">Unemployed in Labor Force: <label id="job">0</label></label><br />
+          <label style="font-size: 2vmin">Population: <label id="pop">0</label></label><br /><br />
+
+          <label style="font-size: 3vmin">Statistics for <label id="zip"></label>:</label><br />
+          ----<br>
+          <label style="font-size: 2vmin">Median Income: $<label id="income1">0</label></label><br>
+          <label style="font-size: 2vmin">Median Income: $<label id="rent1">0</label></label><br>
+          <label style="font-size: 2vmin">Unemployed in Labor Force: <label id="job1">0</label></label><br />
+          <label style="font-size: 2vmin">Population: <label id="pop1">0</label></label><br /><br />
+
+          <div style="float: right; bottom: 0; color: #aaaaaa">Census values from 2013</div>
+        </div>
+        <input id="address" style="position: absolute; bottom: 2%; left: 4.5%; height: 5%; width: 90%; font-size: 5vh; font-family: Arial; border: 2px solid #CCCCCC" value="ZIP Code" onclick="this.value=''" />
+        <input type="submit" style="position:absolute; visibility: hidden; top: 0; left: 0;" />
+      </form>
+    </div>
+  </body>
+</html>
